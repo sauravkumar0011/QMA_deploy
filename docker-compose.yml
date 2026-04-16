@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=Mysql@123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend-net
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - backend-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - backend-net
+
+  admin-server:
+    build: ./admin-server
+    container_name: admin-server
+    ports:
+      - "9090:9090"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - backend-net
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - DB_URL=jdbc:mysql://mysql-db:3306/quantitymeasurement_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=Mysql@123
+    depends_on:
+      - eureka-server
+      - mysql-db
+    networks:
+      - backend-net
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - DB_URL=jdbc:mysql://mysql-db:3306/quantitymeasurement_user_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=Mysql@123
+    depends_on:
+      - eureka-server
+      - mysql-db
+    networks:
+      - backend-net
+
+  measurement-service:
+    build: ./measurement-service
+    container_name: measurement-service
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - DB_URL=jdbc:mysql://mysql-db:3306/quantitymeasurement_service_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=Mysql@123
+    depends_on:
+      - eureka-server
+      - mysql-db
+    networks:
+      - backend-net
+
+volumes:
+  mysql_data:
+
+networks:
+  backend-net:
+    driver: bridge
