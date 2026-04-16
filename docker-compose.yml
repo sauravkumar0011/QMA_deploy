@@ -7,11 +7,16 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=Mysql@123
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - backend-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-pMysql@123"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
   eureka-server:
     build: ./eureka-server
@@ -48,6 +53,7 @@ services:
   auth-service:
     build: ./auth-service
     container_name: auth-service
+    restart: on-failure
     ports:
       - "8081:8081"
     environment:
@@ -56,14 +62,17 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=Mysql@123
     depends_on:
-      - eureka-server
-      - mysql-db
+      eureka-server:
+        condition: service_started
+      mysql-db:
+        condition: service_healthy
     networks:
       - backend-net
 
   user-service:
     build: ./user-service
     container_name: user-service
+    restart: on-failure
     ports:
       - "8082:8082"
     environment:
@@ -72,14 +81,17 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=Mysql@123
     depends_on:
-      - eureka-server
-      - mysql-db
+      eureka-server:
+        condition: service_started
+      mysql-db:
+        condition: service_healthy
     networks:
       - backend-net
 
   measurement-service:
     build: ./measurement-service
     container_name: measurement-service
+    restart: on-failure
     ports:
       - "8083:8083"
     environment:
@@ -88,8 +100,10 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=Mysql@123
     depends_on:
-      - eureka-server
-      - mysql-db
+      eureka-server:
+        condition: service_started
+      mysql-db:
+        condition: service_healthy
     networks:
       - backend-net
 
