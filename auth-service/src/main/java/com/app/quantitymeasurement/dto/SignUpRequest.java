@@ -29,12 +29,12 @@ public class SignUpRequest {
 
     public SignUpRequest() {}
 
-    public SignUpRequest(String firstName, String lastName, String email, String password, String mobileNo) {
+    public SignUpRequest(String firstName, String lastName, String email, String password, String mobile) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.mobile = mobileNo;
+        this.mobile = mobile;
     }
 
     public String getFirstName() { return firstName; }
@@ -46,7 +46,7 @@ public class SignUpRequest {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public String getMobileNo() { return mobile; }
-    public void setMobileNo(String mobileNo) { this.mobile = mobileNo; }
+    public void setMobileNo(String mobile) { this.mobile = mobile; }
 
     // Builder Pattern
     public static class SignUpRequestBuilder {
@@ -60,7 +60,7 @@ public class SignUpRequest {
         public SignUpRequestBuilder lastName(String lastName) { this.lastName = lastName; return this; }
         public SignUpRequestBuilder email(String email) { this.email = email; return this; }
         public SignUpRequestBuilder password(String password) { this.password = password; return this; }
-        public SignUpRequestBuilder mobileNo(String mobileNo) { this.mobile = mobileNo; return this; }
+        public SignUpRequestBuilder mobileNo(String mobile) { this.mobile = mobile; return this; }
 
         public SignUpRequest build() {
             return new SignUpRequest(firstName, lastName, email, password, mobile);
